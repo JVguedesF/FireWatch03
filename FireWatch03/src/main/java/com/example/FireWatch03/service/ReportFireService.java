@@ -40,7 +40,7 @@ public class ReportFireService {
         ReportFire existingReport = reportFireRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
 
-        // Atualize os campos de existingReport com os dados de reportDetailsDTO
+
         existingReport.setState(reportDetailsDTO.getState());
         existingReport.setCity(reportDetailsDTO.getCity());
         existingReport.setLatitude(reportDetailsDTO.getLatitude());
@@ -49,7 +49,7 @@ public class ReportFireService {
         existingReport.setDatetime(reportDetailsDTO.getDatetime());
         existingReport.setIsAreaClosed(reportDetailsDTO.getIsAreaClosed());
 
-        // Defina appUser para o existingReport
+
         AppUser appUser = appUserRepository.findById(appUserId) // Correto!
                 .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
         existingReport.setAppUser(appUser);

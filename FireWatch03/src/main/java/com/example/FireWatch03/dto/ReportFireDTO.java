@@ -20,13 +20,13 @@ public class ReportFireDTO {
     private Date datetime;
     private char isAreaClosed;
 
-    // Altere para Long
+
     private Long appUserId;
 
-    // Construtor padrão (vazio)
+
     public ReportFireDTO() {}
 
-    // Construtor que recebe um ReportFire
+
     public ReportFireDTO(ReportFire reportFire) {
         this.id = reportFire.getId();
         this.state = reportFire.getState();

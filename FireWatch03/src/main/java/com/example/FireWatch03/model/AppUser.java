@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "app_user")// Nome da tabela no banco de dados
+@Table(name = "app_user")
 @Getter
 @Setter
 public class AppUser {
@@ -17,10 +17,10 @@ public class AppUser {
     private String name;
     private String email;
     private String password;
-    private String phoneNumber; // Ajustado o nome do atributo
+    private String phoneNumber;
 
     @Column(name = "wants_receive_sms")
-    private char wantsReceiveSms; // Tipo char para 'Y' ou 'N'
+    private char wantsReceiveSms;
 
     private Double longitude;
     private Double latitude;

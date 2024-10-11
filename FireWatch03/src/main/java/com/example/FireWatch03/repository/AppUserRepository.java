@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
-    // Você não precisa de @Autowired aqui!
-    // A injeção de dependência é feita automaticamente pelo Spring Data JPA
+
 }

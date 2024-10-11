@@ -3,6 +3,7 @@ package com.example.FireWatch03.dto;
 import com.example.FireWatch03.model.ReportFire;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.sql.Blob;
 import java.util.Date;
 
@@ -19,9 +20,13 @@ public class ReportFireDTO {
     private Date datetime;
     private char isAreaClosed;
 
+    // Altere para Long
+    private Long appUserId;
+
     // Construtor padrão (vazio)
     public ReportFireDTO() {}
 
+    // Construtor que recebe um ReportFire
     public ReportFireDTO(ReportFire reportFire) {
         this.id = reportFire.getId();
         this.state = reportFire.getState();

@@ -18,6 +18,10 @@ public class AppUser {
     private String email;
     private String password;
     private String phoneNumber; // Ajustado o nome do atributo
+
+    @Column(name = "wants_receive_sms")
+    private char wantsReceiveSms; // Tipo char para 'Y' ou 'N'
+
     private Double longitude;
     private Double latitude;
 

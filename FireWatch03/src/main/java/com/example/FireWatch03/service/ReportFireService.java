@@ -1,10 +1,13 @@
 package com.example.FireWatch03.service;
 
 import com.example.FireWatch03.dto.ReportFireDTO;
+import com.example.FireWatch03.model.AppUser;
 import com.example.FireWatch03.model.ReportFire;
+import com.example.FireWatch03.repository.AppUserRepository;
 import com.example.FireWatch03.repository.ReportFireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -14,21 +17,27 @@ public class ReportFireService {
     @Autowired
     private ReportFireRepository reportFireRepository;
 
+    @Autowired
+    private AppUserRepository appUserRepository;
+
     public List<ReportFire> getAllReports() {
         return reportFireRepository.findByIsDeleted('N');
     }
 
     public ReportFire getReportById(Long id) {
-        return reportFireRepository.findById(id) // Correto
+        return reportFireRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
     }
 
-    public ReportFire createReport(ReportFire report) {
+    public ReportFire createReport(ReportFire report, Long appUserId) {
+        AppUser appUser = appUserRepository.findById(appUserId)
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
+        report.setAppUser(appUser); // Define a relação ManyToOne
         return reportFireRepository.save(report);
     }
 
-    public ReportFire updateReport(Long id, ReportFireDTO reportDetailsDTO) {
-        ReportFire existingReport = reportFireRepository.findById(id) // Correto
+    public ReportFire updateReport(Long id, ReportFireDTO reportDetailsDTO, Long appUserId) {
+        ReportFire existingReport = reportFireRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
 
         // Atualize os campos de existingReport com os dados de reportDetailsDTO
@@ -40,11 +49,16 @@ public class ReportFireService {
         existingReport.setDatetime(reportDetailsDTO.getDatetime());
         existingReport.setIsAreaClosed(reportDetailsDTO.getIsAreaClosed());
 
+        // Defina appUser para o existingReport
+        AppUser appUser = appUserRepository.findById(appUserId) // Correto!
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
+        existingReport.setAppUser(appUser);
+
         return reportFireRepository.save(existingReport);
     }
 
     public void deleteReport(Long id) {
-        ReportFire report = reportFireRepository.findById(id) // Correto
+        ReportFire report = reportFireRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
         report.setIsDeleted('Y');
         reportFireRepository.save(report);

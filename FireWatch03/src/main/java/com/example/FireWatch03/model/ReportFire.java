@@ -36,6 +36,6 @@ public class ReportFire {
 
     @ManyToOne
     @JoinColumn(name = "user_id_user")
-    private AppUser appUser;
+    private AppUser appUser; // Referência ao objeto AppUser
 
 }

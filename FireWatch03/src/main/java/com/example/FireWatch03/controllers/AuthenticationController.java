@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/FireWatch03") // Mapeamento base corrigido
+@RequestMapping("/FireWatch03")
 public class AuthenticationController {
 
     @Autowired

@@ -52,8 +52,7 @@ public class UserAutenticator implements UserDetails {
         return login;
     }
 
-    // Métodos is... configurados para true (demonstração).
-    // Em um sistema real, adicione a lógica adequada.
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

@@ -1,6 +1,6 @@
-package com.example.FireWatch03.repository;
+package com.example.FireWatch03.domain.repositories;
 
-import com.example.FireWatch03.model.AppUser;
+import com.example.FireWatch03.domain.models.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

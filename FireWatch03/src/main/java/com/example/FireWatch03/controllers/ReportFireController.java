@@ -1,10 +1,10 @@
-package com.example.FireWatch03.controller;
+package com.example.FireWatch03.controllers;
 
 import com.example.FireWatch03.dto.ReportFireDTO;
-import com.example.FireWatch03.model.AppUser;
-import com.example.FireWatch03.model.ReportFire;
-import com.example.FireWatch03.service.ReportFireService;
-import com.example.FireWatch03.repository.AppUserRepository;
+import com.example.FireWatch03.domain.models.AppUser;
+import com.example.FireWatch03.domain.models.ReportFire;
+import com.example.FireWatch03.domain.services.ReportFireService;
+import com.example.FireWatch03.domain.repositories.AppUserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

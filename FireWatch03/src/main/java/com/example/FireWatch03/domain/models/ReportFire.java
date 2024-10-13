@@ -1,4 +1,4 @@
-package com.example.FireWatch03.model;
+package com.example.FireWatch03.domain.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;

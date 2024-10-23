@@ -5,16 +5,21 @@ CREATE TABLE emergency_call (
     phone_number      VARCHAR2(50) NOT NULL
 );
 
+-- Criando a sequência para a tabela report_fire
+CREATE SEQUENCE report_fire_seq START WITH 1 INCREMENT BY 1;
+
+-- Criando a tabela report_fire
 CREATE TABLE report_fire (
-    id_report_fire VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
-    state          VARCHAR2(2 CHAR) NOT NULL,
-    city           VARCHAR2(50 CHAR) NOT NULL,
-    latitude       FLOAT(4) NOT NULL,
-    longitude      FLOAT(4) NOT NULL,
-    picture        BLOB,
-    datetime       DATE NOT NULL,
-    is_area_closed CHAR(1) DEFAULT 'N' NOT NULL,
-    user_id_user   VARCHAR2(16 CHAR) NOT NULL
+    ID_REPORT_FIRE VARCHAR2(255) NOT NULL PRIMARY KEY DEFAULT 'FIRE_' || report_fire_seq.NEXTVAL, -- Usando a sequência
+    STATE          VARCHAR2(255 CHAR) NOT NULL,
+    CITY           VARCHAR2(255 CHAR) NOT NULL,
+    LATITUDE       FLOAT(4) NOT NULL,
+    LONGITUDE      FLOAT(4) NOT NULL,
+    PICTURE        BLOB,
+    DATETIME       DATE NOT NULL,
+    IS_AREA_CLOSED CHAR(1) NOT NULL,
+    USER_ID_USER   VARCHAR2(255 CHAR) NOT NULL,
+    IS_DELETED     CHAR(1) DEFAULT 'N'
 );
 
 CREATE TABLE sms_notifcation (
@@ -25,7 +30,7 @@ CREATE TABLE sms_notifcation (
     report_fire_id_report_fire VARCHAR2(16 CHAR) NOT NULL
 );
 
-CREATE TABLE "User" (
+CREATE TABLE app_user (
     id_user           VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
     name              VARCHAR2(50 CHAR) NOT NULL,
     email             VARCHAR2(50 CHAR) NOT NULL,
@@ -51,7 +56,7 @@ CREATE TABLE user_suggestions (
 
 ALTER TABLE report_fire
     ADD CONSTRAINT report_fire_user_fk FOREIGN KEY ( user_id_user )
-        REFERENCES "User" ( id_user );
+        REFERENCES app_user ( id_user );
 
 ALTER TABLE sms_notifcation
     ADD CONSTRAINT sms_notifcation_report_fire_fk FOREIGN KEY ( report_fire_id_report_fire )
@@ -59,12 +64,12 @@ ALTER TABLE sms_notifcation
 
 ALTER TABLE sms_notifcation
     ADD CONSTRAINT sms_notifcation_user_fk FOREIGN KEY ( user_id_user )
-        REFERENCES "User" ( id_user );
+        REFERENCES app_user ( id_user );
 
 ALTER TABLE user_history
     ADD CONSTRAINT user_history_user_fk FOREIGN KEY ( user_id_user )
-        REFERENCES "User" ( id_user );
+        REFERENCES app_user ( id_user );
 
 ALTER TABLE user_suggestions
     ADD CONSTRAINT user_suggestions_user_fk FOREIGN KEY ( user_id_user )
-        REFERENCES "User" ( id_user );
+        REFERENCES app_user ( id_user );

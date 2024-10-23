@@ -1,0 +1,5 @@
+-- V3__Insert_initial_user.sql
+
+-- Inserindo o usuário inicial na tabela app_user
+INSERT INTO app_user (NAME, EMAIL, LONGITUDE, LATITUDE, PASSWORD, PHONE_NUMBER, WANTS_RECEIVE_SMS)
+VALUES ('Nome do Usuário', 'usuario@exemplo.com', -46.6333, -23.5505, 'senha123', '1234567890', 'Y');

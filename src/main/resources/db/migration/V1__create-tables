@@ -1,0 +1,75 @@
+-- V1__Create_tables.sql
+CREATE TABLE emergency_call (
+    id_emergency_call VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
+    description       VARCHAR2(50 CHAR) NOT NULL,
+    phone_number      VARCHAR2(50) NOT NULL
+);
+
+-- Criando a sequência para a tabela report_fire
+CREATE SEQUENCE report_fire_seq START WITH 1 INCREMENT BY 1;
+
+-- Criando a tabela report_fire
+CREATE TABLE report_fire (
+    ID_REPORT_FIRE VARCHAR2(255) NOT NULL PRIMARY KEY DEFAULT 'FIRE_' || report_fire_seq.NEXTVAL, -- Usando a sequência
+    STATE          VARCHAR2(255 CHAR) NOT NULL,
+    CITY           VARCHAR2(255 CHAR) NOT NULL,
+    LATITUDE       FLOAT(4) NOT NULL,
+    LONGITUDE      FLOAT(4) NOT NULL,
+    PICTURE        BLOB,
+    DATETIME       DATE NOT NULL,
+    IS_AREA_CLOSED CHAR(1) NOT NULL,
+    USER_ID_USER   VARCHAR2(255 CHAR) NOT NULL,
+    IS_DELETED     CHAR(1) DEFAULT 'N'
+);
+
+CREATE TABLE sms_notifcation (
+    id_sms_notification        VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
+    processed_datetime         DATE NOT NULL,
+    message                    VARCHAR2(200 CHAR) NOT NULL,
+    user_id_user               VARCHAR2(16 CHAR) NOT NULL,
+    report_fire_id_report_fire VARCHAR2(16 CHAR) NOT NULL
+);
+
+CREATE TABLE app_user (
+    id_user           VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
+    name              VARCHAR2(50 CHAR) NOT NULL,
+    email             VARCHAR2(50 CHAR) NOT NULL,
+    password          VARCHAR2(50 CHAR) NOT NULL,
+    phone_number      VARCHAR2(50 CHAR) NOT NULL,
+    wants_receive_sms CHAR(1) NOT NULL,
+    longitude         FLOAT(4) NOT NULL,
+    latitude          FLOAT(4) NOT NULL
+);
+
+CREATE TABLE user_history (
+    id_user_history  VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
+    report_or_search CHAR(1) NOT NULL,
+    datetime         DATE NOT NULL,
+    user_id_user     VARCHAR2(16 CHAR) NOT NULL
+);
+
+CREATE TABLE user_suggestions (
+    id_user_suggetions VARCHAR2(16 CHAR) NOT NULL PRIMARY KEY,
+    message            VARCHAR2(200 CHAR) NOT NULL,
+    user_id_user       VARCHAR2(16 CHAR) NOT NULL
+);
+
+ALTER TABLE report_fire
+    ADD CONSTRAINT report_fire_user_fk FOREIGN KEY ( user_id_user )
+        REFERENCES app_user ( id_user );
+
+ALTER TABLE sms_notifcation
+    ADD CONSTRAINT sms_notifcation_report_fire_fk FOREIGN KEY ( report_fire_id_report_fire )
+        REFERENCES report_fire ( id_report_fire );
+
+ALTER TABLE sms_notifcation
+    ADD CONSTRAINT sms_notifcation_user_fk FOREIGN KEY ( user_id_user )
+        REFERENCES app_user ( id_user );
+
+ALTER TABLE user_history
+    ADD CONSTRAINT user_history_user_fk FOREIGN KEY ( user_id_user )
+        REFERENCES app_user ( id_user );
+
+ALTER TABLE user_suggestions
+    ADD CONSTRAINT user_suggestions_user_fk FOREIGN KEY ( user_id_user )
+        REFERENCES app_user ( id_user );

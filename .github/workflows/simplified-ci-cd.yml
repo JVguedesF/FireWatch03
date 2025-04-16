@@ -1,0 +1,97 @@
+name: FireWatch03 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B clean package
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Build Docker Image
+        run: docker build -t firewatch03:${{ github.sha }} .
+
+      - name: Save Docker image metadata
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          mkdir -p artifacts
+          echo "Image: firewatch03:${{ github.sha }}" > artifacts/image-info.txt
+          echo "Build date: $(date)" >> artifacts/image-info.txt
+          echo "Commit: ${{ github.sha }}" >> artifacts/image-info.txt
+
+      - name: Upload artifact info
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-info
+          path: artifacts/
+
+  deploy-staging:
+    name: Deploy to Staging (Simulation)
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download deployment info
+        uses: actions/download-artifact@v3
+        with:
+          name: deployment-info
+          path: artifacts/
+
+      - name: Simulate Staging Deployment
+        run: |
+          echo "=== STAGING DEPLOYMENT SIMULATION ==="
+          echo "Deploying to staging environment..."
+          echo "Using configuration from artifacts/image-info.txt:"
+          cat artifacts/image-info.txt
+          echo "Environment: Staging"
+          echo "Creating deployment configuration..."
+          echo "Starting containers (simulation)..."
+          echo "Verifying deployment health..."
+          echo "Deployment to staging complete!"
+
+  deploy-production:
+    name: Deploy to Production (Simulation)
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download deployment info
+        uses: actions/download-artifact@v3
+        with:
+          name: deployment-info
+          path: artifacts/
+
+      - name: Simulate Production Deployment
+        run: |
+          echo "=== PRODUCTION DEPLOYMENT SIMULATION ==="
+          echo "Deploying to production environment..."
+          echo "Using configuration from artifacts/image-info.txt:"
+          cat artifacts/image-info.txt
+          echo "Environment: Production"
+          echo "Creating deployment configuration..."
+          echo "Starting containers (simulation)..."
+          echo "Verifying deployment health..."
+          echo "Deployment to production complete!"

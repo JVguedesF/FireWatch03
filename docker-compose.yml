@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKER_IMAGE:-firewatch03:latest}
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - API_SECURITY_TOKEN_SECRET=${API_SECURITY_TOKEN_SECRET}
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - firewatch-network
+
+  db:
+    image: gvenzl/oracle-xe:21-slim
+    env_file:
+      - .env
+    environment:
+      - ORACLE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - ORACLE_DATABASE=ORCLCDB
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    ports:
+      - "1521:1521"
+    restart: always
+    networks:
+      - firewatch-network
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: always
+    networks:
+      - firewatch-network
+
+  grafana:
+    image: grafana/grafana
+    env_file:
+      - .env
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/firewatch-dashboard.json:/etc/grafana/provisioning/dashboards/firewatch-dashboard.json
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: always
+    networks:
+      - firewatch-network
+
+networks:
+  firewatch-network:
+    driver: bridge
+
+volumes:
+  oracle-data:
+  grafana-data:

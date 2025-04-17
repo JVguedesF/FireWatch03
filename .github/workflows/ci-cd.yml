@@ -25,6 +25,7 @@ jobs:
 
       - name: Run Tests
         run: mvn test -Dspring.profiles.active=test -Dspring.flyway.enabled=false -Dspring.datasource.url=jdbc:h2:mem:testdb
+        run: mvn test -Dspring.profiles.active=test
 
       - name: Validate Environment Files
         run: |

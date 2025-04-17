@@ -1,0 +1,22 @@
+site_name: FireWatch03 - Documentação DevOps
+theme:
+  name: material
+
+plugins:
+  - search
+  - mermaid2
+  - pdf-export
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed
+
+nav:
+  - Início: index.md
+  - Sobre o Projeto: projeto.md
+  - Pipeline CI/CD: pipeline.md
+  - Containerização e Orquestração: containerizacao.md
+  - Evidências e Execução: evidencias.md
+  - Equipe: equipe.md

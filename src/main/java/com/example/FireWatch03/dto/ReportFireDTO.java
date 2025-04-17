@@ -3,8 +3,6 @@ package com.example.FireWatch03.dto;
 import com.example.FireWatch03.domain.models.ReportFire;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.sql.Blob;
 import java.util.Date;
 
 @Getter
@@ -16,16 +14,12 @@ public class ReportFireDTO {
     private String city;
     private Double latitude;
     private Double longitude;
-    private Blob picture;
+    private byte[] picture;
     private Date datetime;
     private char isAreaClosed;
-
-
     private Long appUserId;
 
-
     public ReportFireDTO() {}
-
 
     public ReportFireDTO(ReportFire reportFire) {
         this.id = reportFire.getId();

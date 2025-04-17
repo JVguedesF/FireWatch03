@@ -40,6 +40,7 @@ public class ReportFireController {
 
     @PostMapping
     public ResponseEntity<ReportFireDTO> createReport(@Valid @RequestBody ReportFireDTO reportFireDTO) {
+        // Cria o ReportFire a partir do DTO
         ReportFire report = new ReportFire();
         report.setState(reportFireDTO.getState());
         report.setCity(reportFireDTO.getCity());
@@ -49,12 +50,7 @@ public class ReportFireController {
         report.setDatetime(reportFireDTO.getDatetime());
         report.setIsAreaClosed(reportFireDTO.getIsAreaClosed());
 
-        // Use o appUserId do DTO para buscar o usuário
-        AppUser appUser = appUserRepository.findById(reportFireDTO.getAppUserId())
-                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + reportFireDTO.getAppUserId()));
-        report.setAppUser(appUser);
-
-        ReportFire createdReport = reportFireService.createReport(report, reportFireDTO.getAppUserId());
+        ReportFire createdReport = reportFireService.createReport(reportFireDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReportFireDTO(createdReport));
     }
 

@@ -12,7 +12,6 @@ import java.util.Date;
 @Setter
 @Table(name = "report_fire")
 public class ReportFire {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_report_fire")
@@ -24,7 +23,7 @@ public class ReportFire {
     private Double longitude;
 
     @Lob
-    private Blob picture;
+    private byte[] picture;
 
     private Date datetime;
 
@@ -35,7 +34,6 @@ public class ReportFire {
     private char isDeleted = 'N';
 
     @ManyToOne
-    @JoinColumn(name = "user_id_user")
+    @JoinColumn(name = "user_id")
     private AppUser appUser;
-
 }

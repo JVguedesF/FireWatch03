@@ -29,10 +29,20 @@ public class ReportFireService {
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
     }
 
-    public ReportFire createReport(ReportFire report, Long appUserId) {
-        AppUser appUser = appUserRepository.findById(appUserId)
-                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
-        report.setAppUser(appUser); // Define a relação ManyToOne
+    public ReportFire createReport(ReportFireDTO reportFireDTO) {
+        ReportFire report = new ReportFire();
+        report.setState(reportFireDTO.getState());
+        report.setCity(reportFireDTO.getCity());
+        report.setLatitude(reportFireDTO.getLatitude());
+        report.setLongitude(reportFireDTO.getLongitude());
+        report.setPicture(reportFireDTO.getPicture());
+        report.setDatetime(reportFireDTO.getDatetime());
+        report.setIsAreaClosed(reportFireDTO.getIsAreaClosed());
+
+        AppUser appUser = appUserRepository.findById(reportFireDTO.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + reportFireDTO.getAppUserId()));
+        report.setAppUser(appUser);
+
         return reportFireRepository.save(report);
     }
 

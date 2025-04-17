@@ -9,9 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AppUser {
-
     @Id
-    @Column(name = "id_user")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     private String id;
 
     private String name;
@@ -19,10 +19,9 @@ public class AppUser {
     private String password;
     private String phoneNumber;
 
-    @Column(name = "wants_receive_sms")
-    private char wantsReceiveSms;
+    @Column(name = "wants_receive_sms", columnDefinition = "CHAR(1) DEFAULT 'N'")
+    private char wantsReceiveSms = 'N';
 
     private Double longitude;
     private Double latitude;
-
 }

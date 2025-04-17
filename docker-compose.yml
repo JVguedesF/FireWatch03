@@ -2,17 +2,15 @@ version: '3.8'
 
 services:
   app:
-    image: ${DOCKER_IMAGE:-firewatch03:latest}
+    image: ${DOCKER_IMAGE}
     ports:
       - "8080:8080"
-    env_file:
-      - .env.production
     environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - API_SECURITY_TOKEN_SECRET=${API_SECURITY_TOKEN_SECRET}
+      - SPRING_PROFILES_ACTIVE
+      - SPRING_DATASOURCE_URL
+      - SPRING_DATASOURCE_USERNAME
+      - SPRING_DATASOURCE_PASSWORD
+      - API_SECURITY_TOKEN_SECRET
     restart: always
     networks:
       - firewatch-network

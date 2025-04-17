@@ -26,17 +26,26 @@ jobs:
       - name: Run Tests
         run: mvn clean test -Dspring.profiles.active=test
 
-      - name: Validate Environment Files
-        run: |
-          grep "SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL" .env.staging
-          grep "SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL" .env.production
-
       - name: Build Docker Image
         run: |
           if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
-            docker build -t firewatch03:staging .
+            docker build \
+              --build-arg SPRING_PROFILES_ACTIVE=staging \
+              --build-arg SPRING_DATASOURCE_URL="${{ secrets.STAGING_DB_URL }}" \
+              --build-arg SPRING_DATASOURCE_USERNAME="${{ secrets.STAGING_DB_USER }}" \
+              --build-arg SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGING_DB_PASS }}" \
+              --build-arg API_SECURITY_TOKEN_SECRET="${{ secrets.STAGING_API_SECRET }}" \
+              --build-arg GRAFANA_PASSWORD="${{ secrets.STAGING_GF_PASS }}" \
+              -t firewatch03:staging .
           else
-            docker build -t firewatch03:production .
+            docker build \
+              --build-arg SPRING_PROFILES_ACTIVE=prod \
+              --build-arg SPRING_DATASOURCE_URL="${{ secrets.PROD_DB_URL }}" \
+              --build-arg SPRING_DATASOURCE_USERNAME="${{ secrets.PROD_DB_USER }}" \
+              --build-arg SPRING_DATASOURCE_PASSWORD="${{ secrets.PROD_DB_PASS }}" \
+              --build-arg API_SECURITY_TOKEN_SECRET="${{ secrets.PROD_API_SECRET }}" \
+              --build-arg GRAFANA_PASSWORD="${{ secrets.PROD_GF_PASS }}" \
+              -t firewatch03:production .
           fi
 
       - name: Save Docker image
@@ -74,13 +83,15 @@ jobs:
       - name: Simulate Staging Deployment
         run: |
           echo "=== STAGING DEPLOYMENT ==="
-          echo "Copiando .env.staging para .env..."
-          cp .env.staging .env
-          echo "Iniciando contêineres para ambiente de STAGING..."
-          echo "Aplicação estaria disponível em http://localhost:8080"
-          echo "Prometheus estaria disponível em http://localhost:9090"
-          echo "Grafana estaria disponível em http://localhost:3000"
-          echo "Ambiente de STAGING implantado com sucesso!"
+          echo "Gerando .env dinâmico..."
+          echo "SPRING_PROFILES_ACTIVE=staging" > .env
+          echo "SPRING_DATASOURCE_URL=${{ secrets.STAGING_DB_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.STAGING_DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.STAGING_DB_PASS }}" >> .env
+          echo "API_SECURITY_TOKEN_SECRET=${{ secrets.STAGING_API_SECRET }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.STAGING_GF_PASS }}" >> .env
+          echo "DOCKER_IMAGE=firewatch03:staging" >> .env
+          echo "Contêineres configurados para STAGING!"
 
   deploy-production:
     name: Deploy to Production (Local)
@@ -101,10 +112,12 @@ jobs:
       - name: Simulate Production Deployment
         run: |
           echo "=== PRODUCTION DEPLOYMENT ==="
-          echo "Copiando .env.production para .env..."
-          cp .env.production .env
-          echo "Iniciando contêineres para ambiente de PRODUÇÃO..."
-          echo "Aplicação estaria disponível em http://localhost:8080"
-          echo "Prometheus estaria disponível em http://localhost:9090"
-          echo "Grafana estaria disponível em http://localhost:3000"
-          echo "Ambiente de PRODUÇÃO implantado com sucesso!"
+          echo "Gerando .env dinâmico..."
+          echo "SPRING_PROFILES_ACTIVE=prod" > .env
+          echo "SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASS }}" >> .env
+          echo "API_SECURITY_TOKEN_SECRET=${{ secrets.PROD_API_SECRET }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.PROD_GF_PASS }}" >> .env
+          echo "DOCKER_IMAGE=firewatch03:production" >> .env
+          echo "Contêineres configurados para PRODUÇÃO!"

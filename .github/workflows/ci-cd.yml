@@ -27,11 +27,21 @@ jobs:
         run: mvn test
 
       - name: Build Docker Image
-        run: docker build -t firewatch03:${{ github.sha }} .
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            docker build -t firewatch03:staging .
+          else
+            docker build -t firewatch03:production .
+          fi
 
       - name: Save Docker image
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-        run: docker save firewatch03:${{ github.sha }} > firewatch03.tar
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            docker save firewatch03:staging > firewatch03.tar
+          else
+            docker save firewatch03:production > firewatch03.tar
+          fi
 
       - name: Upload Docker image as artifact
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -41,11 +51,10 @@ jobs:
           path: firewatch03.tar
 
   deploy-staging:
-    name: Deploy to Staging
+    name: Deploy to Staging (Local)
     needs: build
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    environment: staging
     steps:
       - uses: actions/checkout@v3
 
@@ -57,39 +66,22 @@ jobs:
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Deploy to Staging Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          script: |
-            # Cria pasta e .env completo
-            mkdir -p ~/firewatch03
-            cat > ~/firewatch03/.env << EOF
-            DOCKER_IMAGE=firewatch03:${{ github.sha }}
-            SPRING_PROFILES_ACTIVE=staging
-            SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:ORCLCDB
-            SPRING_DATASOURCE_USERNAME=firewatch
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD_STAGING }}
-            API_SECURITY_TOKEN_SECRET=${{ secrets.JWT_SECRET }}
-            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            EOF
-
-            # Copia o compose único
-            scp docker-compose.yml ~/firewatch03/
-
-            # Executa o deploy
-            cd ~/firewatch03
-            docker-compose down
-            docker-compose up -d
+      - name: Simulate Staging Deployment
+        run: |
+          echo "=== STAGING DEPLOYMENT ==="
+          echo "Copiando .env.staging para .env..."
+          cp .env.staging .env
+          echo "Iniciando contêineres para ambiente de STAGING..."
+          echo "Aplicação estaria disponível em http://localhost:8080"
+          echo "Prometheus estaria disponível em http://localhost:9090"
+          echo "Grafana estaria disponível em http://localhost:3000"
+          echo "Ambiente de STAGING implantado com sucesso!"
 
   deploy-production:
-    name: Deploy to Production
+    name: Deploy to Production (Local)
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v3
 
@@ -101,26 +93,13 @@ jobs:
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Deploy to Production Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          script: |
-            mkdir -p ~/firewatch03
-            cat > ~/firewatch03/.env << EOF
-            DOCKER_IMAGE=firewatch03:${{ github.sha }}
-            SPRING_PROFILES_ACTIVE=prod
-            SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:ORCLCDB
-            SPRING_DATASOURCE_USERNAME=firewatch
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD_PROD }}
-            API_SECURITY_TOKEN_SECRET=${{ secrets.JWT_SECRET }}
-            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            EOF
-
-            scp docker-compose.yml ~/firewatch03/
-            
-            cd ~/firewatch03
-            docker-compose down
-            docker-compose up -d
+      - name: Simulate Production Deployment
+        run: |
+          echo "=== PRODUCTION DEPLOYMENT ==="
+          echo "Copiando .env.production para .env..."
+          cp .env.production .env
+          echo "Iniciando contêineres para ambiente de PRODUÇÃO..."
+          echo "Aplicação estaria disponível em http://localhost:8080"
+          echo "Prometheus estaria disponível em http://localhost:9090"
+          echo "Grafana estaria disponível em http://localhost:3000"
+          echo "Ambiente de PRODUÇÃO implantado com sucesso!"

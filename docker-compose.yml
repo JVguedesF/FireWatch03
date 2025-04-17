@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - .env.production
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
@@ -22,7 +22,7 @@ services:
   db:
     image: gvenzl/oracle-xe:21-slim
     env_file:
-      - .env
+      - .env.production
     environment:
       - ORACLE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - ORACLE_DATABASE=ORCLCDB
@@ -47,7 +47,7 @@ services:
   grafana:
     image: grafana/grafana
     env_file:
-      - .env
+      - .env.production
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:

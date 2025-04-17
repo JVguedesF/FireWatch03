@@ -39,3 +39,4 @@ build/
 .env.production
 *.log
 *.tar
+.env

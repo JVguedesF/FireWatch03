@@ -42,3 +42,5 @@ build/
 *.tar
 .start-production.sh
 .start-staging.sh
+start-staging.sh
+start-production.sh

@@ -21,12 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/FireWatch03")
 public class AuthenticationController {
 
+    private final AuthenticationManager authenticationManager;
+    private final UserAutenticatorRepository repository;
+    private final TokenService tokenService;
+
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private UserAutenticatorRepository repository;
-    @Autowired
-    private TokenService tokenService;
+    public AuthenticationController(AuthenticationManager authenticationManager, UserAutenticatorRepository repository, TokenService tokenService) {
+        this.authenticationManager = authenticationManager;
+        this.repository = repository;
+        this.tokenService = tokenService;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
@@ -36,7 +40,6 @@ public class AuthenticationController {
             var token = tokenService.generateToken((UserAutenticator) auth.getPrincipal());
             return ResponseEntity.ok(new LoginResponseDTO(token));
         } catch (AuthenticationException e) {
-            // Trata erro de autenticação (ex: credenciais inválidas)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
@@ -54,7 +57,6 @@ public class AuthenticationController {
             UserAutenticator savedUser = repository.save(newUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
-            // Trata erro de persistência (ex: violação de chave única)
             return ResponseEntity.badRequest().body(new ErrorDTO("Erro ao registrar usuário."));
         }
     }

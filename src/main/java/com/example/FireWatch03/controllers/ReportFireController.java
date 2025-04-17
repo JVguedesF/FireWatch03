@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/report-fires")
 public class ReportFireController {
 
-    @Autowired
-    private ReportFireService reportFireService;
+    private final ReportFireService reportFireService;
+    private final AppUserRepository appUserRepository;
 
     @Autowired
-    private AppUserRepository appUserRepository;
+    public ReportFireController(ReportFireService reportFireService, AppUserRepository appUserRepository) {
+        this.reportFireService = reportFireService;
+        this.appUserRepository = appUserRepository;
+    }
 
     @GetMapping
     public List<ReportFireDTO> getAllReports() {

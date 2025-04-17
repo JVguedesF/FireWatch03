@@ -14,11 +14,15 @@ import java.util.NoSuchElementException;
 @Service
 public class ReportFireService {
 
-    @Autowired
-    private ReportFireRepository reportFireRepository;
+    private final ReportFireRepository reportFireRepository;
+
+    private final AppUserRepository appUserRepository;
 
     @Autowired
-    private AppUserRepository appUserRepository;
+    public ReportFireService(ReportFireRepository reportFireRepository, AppUserRepository appUserRepository) {
+        this.reportFireRepository = reportFireRepository;
+        this.appUserRepository = appUserRepository;
+    }
 
     public List<ReportFire> getAllReports() {
         return reportFireRepository.findByIsDeleted('N');

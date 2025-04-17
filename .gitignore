@@ -40,5 +40,5 @@ build/
 .env.production
 *.log
 *.tar
-.start.sh
-start.sh
+.deploy.sh
+deploy.sh

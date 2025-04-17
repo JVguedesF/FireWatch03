@@ -40,3 +40,5 @@ build/
 .env.production
 *.log
 *.tar
+.start-production.sh
+.start-staging.sh

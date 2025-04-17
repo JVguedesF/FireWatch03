@@ -18,6 +18,11 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
+    @Value("${spring.profiles.active:prod}")
+    private String activeProfile;
+
+    private static final ZoneOffset ZONE = ZoneOffset.of("-03:00");
+
     public String generateToken(UserAutenticator user){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -45,7 +50,8 @@ public class TokenService {
         }
     }
 
-    private Instant genExpirationDate(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    private Instant genExpirationDate() {
+        int hours = "staging".equals(activeProfile) ? 8 : 2;
+        return LocalDateTime.now().plusHours(hours).toInstant(ZONE);
     }
 }

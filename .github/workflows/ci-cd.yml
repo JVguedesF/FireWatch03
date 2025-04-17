@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: 🛠️ Build & Test
     runs-on: ubuntu-latest
+    outputs:
+      image-sha: ${{ steps.tag.outputs.image-sha }}
     steps:
       - uses: actions/checkout@v3
 
@@ -26,101 +28,64 @@ jobs:
       - name: Run Tests
         run: mvn test
 
-      - name: Build Docker Image
-        run: docker build -t firewatch03:${{ github.sha }} .
+      - name: Build Docker image
+        id: tag
+        run: |
+          IMAGE_TAG="${GITHUB_SHA}"
+          docker build -t firewatch03:$IMAGE_TAG .
+          echo "::set-output name=image-sha::$IMAGE_TAG"
 
-      - name: Save Docker image
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-        run: docker save firewatch03:${{ github.sha }} > firewatch03.tar
-
-      - name: Upload Docker image as artifact
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-        uses: actions/upload-artifact@v3
+      - name: Save Docker image artifact
+        run: |
+          docker save firewatch03:${{ steps.tag.outputs.image-sha }} > firewatch03.tar
+        # disponibiliza o .tar para os próximos jobs
+      - uses: actions/upload-artifact@v3
         with:
           name: docker-image
           path: firewatch03.tar
 
   deploy-staging:
-    name: Deploy to Staging
+    name: 🚀 Deploy Staging (localhost)
     needs: build
-    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    environment: staging
+    if: github.ref == 'refs/heads/develop'
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download Docker image
-        uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
           name: docker-image
 
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Deploy to Staging Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          script: |
-            # Cria pasta e .env completo
-            mkdir -p ~/firewatch03
-            cat > ~/firewatch03/.env << EOF
-            DOCKER_IMAGE=firewatch03:${{ github.sha }}
-            SPRING_PROFILES_ACTIVE=staging
-            SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:ORCLCDB
-            SPRING_DATASOURCE_USERNAME=firewatch
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD_STAGING }}
-            API_SECURITY_TOKEN_SECRET=${{ secrets.JWT_SECRET }}
-            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            EOF
+      - name: Preparar ambiente Staging
+        run: |
+          cp .env.staging .env
+          echo "Imagem: firewatch03:${{ needs.build.outputs.image-sha }}"
+          docker-compose down
+          docker-compose up -d
 
-            # Copia o compose único
-            scp docker-compose.yml ~/firewatch03/
-
-            # Executa o deploy
-            cd ~/firewatch03
-            docker-compose down
-            docker-compose up -d
+      - name: Validar containers
+        run: docker ps --filter name=firewatch03_app
 
   deploy-production:
-    name: Deploy to Production
+    name: 🚀 Deploy Production (localhost)
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
+    if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download Docker image
-        uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
           name: docker-image
 
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Deploy to Production Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          script: |
-            mkdir -p ~/firewatch03
-            cat > ~/firewatch03/.env << EOF
-            DOCKER_IMAGE=firewatch03:${{ github.sha }}
-            SPRING_PROFILES_ACTIVE=prod
-            SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:ORCLCDB
-            SPRING_DATASOURCE_USERNAME=firewatch
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD_PROD }}
-            API_SECURITY_TOKEN_SECRET=${{ secrets.JWT_SECRET }}
-            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            EOF
+      - name: Preparar ambiente Produção
+        run: |
+          cp .env.production .env
+          echo "Imagem: firewatch03:${{ needs.build.outputs.image-sha }}"
+          docker-compose down
+          docker-compose up -d
 
-            scp docker-compose.yml ~/firewatch03/
-            
-            cd ~/firewatch03
-            docker-compose down
-            docker-compose up -d
+      - name: Validar containers
+        run: docker ps --filter name=firewatch03_app

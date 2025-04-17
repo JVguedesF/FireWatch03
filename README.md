@@ -67,7 +67,7 @@ docker-compose up -d
 
 4. Acesse:
    - API: http://localhost:8080
-   - Grafana: http://localhost:3000 (usuário: admin, senha: a definida no .env)
+   - Grafana: http://localhost:3000 
    - Prometheus: http://localhost:9090
 
 ## Ambientes

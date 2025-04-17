@@ -13,23 +13,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - API_SECURITY_TOKEN_SECRET=${API_SECURITY_TOKEN_SECRET}
-    depends_on:
-      - db
-    restart: always
-    networks:
-      - firewatch-network
-
-  db:
-    image: gvenzl/oracle-xe:21-slim
-    env_file:
-      - .env.production
-    environment:
-      - ORACLE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - ORACLE_DATABASE=ORCLCDB
-    volumes:
-      - oracle-data:/opt/oracle/oradata
-    ports:
-      - "1521:1521"
     restart: always
     networks:
       - firewatch-network
@@ -66,5 +49,4 @@ networks:
     driver: bridge
 
 volumes:
-  oracle-data:
   grafana-data:

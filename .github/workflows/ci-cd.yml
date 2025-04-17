@@ -26,6 +26,11 @@ jobs:
       - name: Run Tests
         run: mvn test
 
+      - name: Validate Environment Files
+        run: |
+          grep "SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL" .env.staging
+          grep "SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL" .env.production
+
       - name: Build Docker Image
         run: |
           if [ "${{ github.ref }}" == "refs/heads/develop" ]; then

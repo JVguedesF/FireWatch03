@@ -8,84 +8,116 @@ on:
 
 jobs:
   build:
-    name: 🛠️ Build & Test
+    name: Build and Test
     runs-on: ubuntu-latest
-    outputs:
-      image-sha: ${{ steps.tag.outputs.image-sha }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn -B clean package
+      - name: Build with Maven (skipping tests)
+        run: mvn -B clean package -DskipTests
 
       - name: Run Tests
-        run: mvn test
+        run: mvn clean test -Dspring.profiles.active=test
 
-      - name: Build Docker image
-        id: tag
+      - name: Build Docker Image
         run: |
-          IMAGE_TAG="${GITHUB_SHA}"
-          docker build -t firewatch03:$IMAGE_TAG .
-          echo "::set-output name=image-sha::$IMAGE_TAG"
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            docker build \
+              --build-arg SPRING_PROFILES_ACTIVE=staging \
+              --build-arg SPRING_DATASOURCE_URL="${{ secrets.STAGING_DB_URL }}" \
+              --build-arg SPRING_DATASOURCE_USERNAME="${{ secrets.STAGING_DB_USER }}" \
+              --build-arg SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGING_DB_PASS }}" \
+              --build-arg API_SECURITY_TOKEN_SECRET="${{ secrets.STAGING_API_SECRET }}" \
+              --build-arg GRAFANA_PASSWORD="${{ secrets.STAGING_GF_PASS }}" \
+              -t firewatch03:staging .
+          else
+            docker build \
+              --build-arg SPRING_PROFILES_ACTIVE=prod \
+              --build-arg SPRING_DATASOURCE_URL="${{ secrets.PROD_DB_URL }}" \
+              --build-arg SPRING_DATASOURCE_USERNAME="${{ secrets.PROD_DB_USER }}" \
+              --build-arg SPRING_DATASOURCE_PASSWORD="${{ secrets.PROD_DB_PASS }}" \
+              --build-arg API_SECURITY_TOKEN_SECRET="${{ secrets.PROD_API_SECRET }}" \
+              --build-arg GRAFANA_PASSWORD="${{ secrets.PROD_GF_PASS }}" \
+              -t firewatch03:production .
+          fi
 
-      - name: Save Docker image artifact
+      - name: Save Docker image
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          docker save firewatch03:${{ steps.tag.outputs.image-sha }} > firewatch03.tar
-        # disponibiliza o .tar para os próximos jobs
-      - uses: actions/upload-artifact@v3
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            docker save firewatch03:staging > firewatch03.tar
+          else
+            docker save firewatch03:production > firewatch03.tar
+          fi
+
+      - name: Upload Docker image as artifact
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: firewatch03.tar
 
   deploy-staging:
-    name: 🚀 Deploy Staging (localhost)
+    name: Deploy to Staging (Local)
     needs: build
-    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
         with:
           name: docker-image
 
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Preparar ambiente Staging
+      - name: Simulate Staging Deployment
         run: |
-          cp .env.staging .env
-          echo "Imagem: firewatch03:${{ needs.build.outputs.image-sha }}"
-          docker-compose down
-          docker-compose up -d
-
-      - name: Validar containers
-        run: docker ps --filter name=firewatch03_app
+          echo "=== STAGING DEPLOYMENT ==="
+          echo "Gerando .env dinâmico..."
+          echo "SPRING_PROFILES_ACTIVE=staging" > .env
+          echo "SPRING_DATASOURCE_URL=${{ secrets.STAGING_DB_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.STAGING_DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.STAGING_DB_PASS }}" >> .env
+          echo "API_SECURITY_TOKEN_SECRET=${{ secrets.STAGING_API_SECRET }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.STAGING_GF_PASS }}" >> .env
+          echo "DOCKER_IMAGE=firewatch03:staging" >> .env
+          echo "Contêineres configurados para STAGING!"
 
   deploy-production:
-    name: 🚀 Deploy Production (localhost)
+    name: Deploy to Production (Local)
     needs: build
-    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
         with:
           name: docker-image
 
       - name: Load Docker image
         run: docker load < firewatch03.tar
 
-      - name: Preparar ambiente Produção
+      - name: Simulate Production Deployment
         run: |
-          cp .env.production .env
-          echo "Imagem: firewatch03:${{ needs.build.outputs.image-sha }}"
-          docker-compose down
-          docker-compose up -d
-
-      - name: Validar containers
-        run: docker ps --filter name=firewatch03_app
+          echo "=== PRODUCTION DEPLOYMENT ==="
+          echo "Gerando .env dinâmico..."
+          echo "SPRING_PROFILES_ACTIVE=prod" > .env
+          echo "SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASS }}" >> .env
+          echo "API_SECURITY_TOKEN_SECRET=${{ secrets.PROD_API_SECRET }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.PROD_GF_PASS }}" >> .env
+          echo "DOCKER_IMAGE=firewatch03:production" >> .env
+          echo "Contêineres configurados para PRODUÇÃO!"

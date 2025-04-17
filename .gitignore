@@ -42,3 +42,5 @@ build/
 *.tar
 .deploy.sh
 deploy.sh
+.env
+

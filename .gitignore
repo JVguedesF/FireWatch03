@@ -37,6 +37,7 @@ build/
 
 /target/.env
 .env.production
+.env.staging
 *.log
 *.tar
 .env

@@ -43,6 +43,5 @@ build/
 .env
 .start-production.sh
 .start-staging.sh
-start-staging.sh
-start-production.sh
+deploy.sh
 

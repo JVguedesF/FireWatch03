@@ -40,3 +40,4 @@ build/
 *.log
 *.tar
 .env
+.env-production

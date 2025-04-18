@@ -42,7 +42,6 @@ markdown_extensions:
 
 nav:
   - Início: index.md
-  - Sobre o Projeto: projeto.md
   - Pipeline CI/CD: pipeline.md
   - Containerização e Orquestração: containerizacao.md
   - Evidências e Execução: evidencias.md

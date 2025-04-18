@@ -28,12 +28,13 @@ services:
   grafana:
     image: grafana/grafana
     env_file:
-      - .env.production
+      - .env
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/firewatch-dashboard.json:/etc/grafana/provisioning/dashboards/firewatch-dashboard.json
+      - ./monitoring/grafana/11378_rev2.json:/etc/grafana/provisioning/dashboards/spring-boot-monitor.json
+      - ./monitoring/grafana/17024_rev1.json:/etc/grafana/provisioning/dashboards/spring-boot-endpoints.json
     ports:
       - "3000:3000"
     depends_on:

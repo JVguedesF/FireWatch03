@@ -66,15 +66,24 @@
 
 *Descrição: Prometheus mostrando o FireWatch03 como alvo de monitoramento.*
 
-![Prometheus Metrics_1](../images/monitoring/prometheus-metrics1.png)
-![Prometheus Metrics_2](../images/monitoring/prometheus-metrics2.png)
-![Prometheus Metrics33](../images/monitoring/prometheus-metrics3.png)
+![Prometheus Metrics 1](../images/monitoring/prometheus-metrics1.png)
 
-*Descrição: Métricas sendo coletadas pelo Prometheus.*
+*Descrição: Métricas sendo coletadas pelo Prometheus (parte 1).*
+
+![Prometheus Metrics 2](../images/monitoring/prometheus-metrics2.png)
+
+*Descrição: Métricas sendo coletadas pelo Prometheus (parte 2).*
+
+![Prometheus Metrics 3](../images/monitoring/prometheus-metrics3.png)
+
+*Descrição: Métricas sendo coletadas pelo Prometheus (parte 3).*
 
 ### 3.2. Grafana
 
 ![Grafana Dashboard](../images/monitoring/grafana-dashboard.png)
+
+*Descrição: Dashboard do Grafana "Spring Boot 2.1 System Monitor" mostrando métricas em tempo real.*
+
 ![Performance Metrics](../images/monitoring/grafana-performance.png)
 
-*Descrição: Dashboard do Grafana mostrando métricas em tempo real.*
+*Descrição: Dashboard do Grafana "Spring Boot Endpoint Metrics" mostrando métricas de performance da aplicação.*

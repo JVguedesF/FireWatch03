@@ -76,7 +76,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/11378_rev2.json:/etc/grafana/provisioning/dashboards/spring-boot-monitor.json
+      - ./monitoring/grafana/17024_rev1.json:/etc/grafana/provisioning/dashboards/spring-boot-endpoints.json
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     ports:
       - "3000:3000"
     networks:
@@ -116,11 +118,9 @@ scrape_configs:
 
 ### Grafana
 
-Dashboard personalizado para visualizar:
-- Uso de CPU e memória
-- Requests por segundo
-- Tempo de resposta
-- Métricas específicas da aplicação
+Dashboards personalizados para visualizar:
+- Spring Boot 2.1 System Monitor: Foco em métricas do sistema como CPU, memória e JVM
+- Spring Boot Endpoint Metrics: Monitoramento de endpoints específicos da aplicação, incluindo taxa de requisições, tempo de resposta e erros
 
 ## Deployment Automatizado
 

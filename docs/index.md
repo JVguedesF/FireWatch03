@@ -33,7 +33,7 @@ FireWatch03 é uma aplicação de monitoramento para cidades inteligentes focada
 - **CI/CD**: GitHub Actions
 - **Containerização**: Docker
 - **Orquestração**: Docker Compose
-- **Monitoramento**: Prometheus e Grafana
+- **Monitoramento**: Prometheus e Grafana (com dashboards Spring Boot System Monitor e Endpoint Metrics)
 
 ## Pipeline CI/CD
 
@@ -57,7 +57,9 @@ Utilizamos Docker com uma abordagem multi-estágio para:
 A aplicação é monitorada através de:
 
 1. **Prometheus**: Coleta de métricas de performance
-2. **Grafana**: Visualização de dados em dashboards personalizados
+2. **Grafana**: Visualização de dados em dashboards personalizados:
+    - Spring Boot 2.1 System Monitor
+    - Spring Boot Endpoint Metrics
 3. **Spring Actuator**: Exposição de métricas da aplicação
 
 ## Ambientes

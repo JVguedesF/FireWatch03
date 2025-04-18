@@ -1,6 +1,5 @@
 package com.example.FireWatch03.config.security;
 
-// Adicione esta importação para @NonNull
 import org.springframework.lang.NonNull;
 
 import com.example.FireWatch03.repositories.UserAutenticatorRepository;

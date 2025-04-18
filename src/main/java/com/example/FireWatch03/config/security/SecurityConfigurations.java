@@ -34,7 +34,7 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/FireWatch03/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/FireWatch03/register").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()  // Adicionando esta linha para permitir acesso ao Actuator
                         .requestMatchers(HttpMethod.POST, "/api/report-fires").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

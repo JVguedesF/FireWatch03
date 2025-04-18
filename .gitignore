@@ -44,4 +44,6 @@ build/
 .deploy.sh
 deploy.sh
 .env
+gerar_pdf.sh
+.gerar_pdf.sh
 

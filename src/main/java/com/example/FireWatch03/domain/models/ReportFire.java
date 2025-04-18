@@ -1,15 +1,17 @@
 package com.example.FireWatch03.domain.models;
 
+import com.example.FireWatch03.domain.dto.ReportFireDTO;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.sql.Blob;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "report_fire")
 public class ReportFire {
 
@@ -24,7 +26,7 @@ public class ReportFire {
     private Double longitude;
 
     @Lob
-    private Blob picture;
+    private byte[] picture;
 
     private Date datetime;
 
@@ -38,4 +40,14 @@ public class ReportFire {
     @JoinColumn(name = "user_id_user")
     private AppUser appUser;
 
+
+    public void updateFromDTO(ReportFireDTO dto) {
+        this.state = dto.getState();
+        this.city = dto.getCity();
+        this.latitude = dto.getLatitude();
+        this.longitude = dto.getLongitude();
+        this.picture = dto.getPicture();
+        this.datetime = dto.getDatetime();
+        this.isAreaClosed = dto.isAreaClosed() ? 'Y' : 'N';
+    }
 }

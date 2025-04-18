@@ -1,10 +1,10 @@
-package com.example.FireWatch03.domain.services;
+package com.example.FireWatch03.services;
 
-import com.example.FireWatch03.dto.ReportFireDTO;
+import com.example.FireWatch03.domain.dto.ReportFireDTO;
 import com.example.FireWatch03.domain.models.AppUser;
 import com.example.FireWatch03.domain.models.ReportFire;
-import com.example.FireWatch03.domain.repositories.AppUserRepository;
-import com.example.FireWatch03.domain.repositories.ReportFireRepository;
+import com.example.FireWatch03.repositories.AppUserRepository;
+import com.example.FireWatch03.repositories.ReportFireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,6 @@ import java.util.NoSuchElementException;
 public class ReportFireService {
 
     private final ReportFireRepository reportFireRepository;
-
     private final AppUserRepository appUserRepository;
 
     @Autowired
@@ -33,28 +32,20 @@ public class ReportFireService {
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
     }
 
-    public ReportFire createReport(ReportFire report, Long appUserId) {
+    public ReportFire createReport(ReportFire report, String appUserId) { // Alterado de Long para String
         AppUser appUser = appUserRepository.findById(appUserId)
                 .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
-        report.setAppUser(appUser); // Define a relação ManyToOne
+        report.setAppUser(appUser);
         return reportFireRepository.save(report);
     }
 
-    public ReportFire updateReport(Long id, ReportFireDTO reportDetailsDTO, Long appUserId) {
+    public ReportFire updateReport(Long id, ReportFireDTO reportDetailsDTO, String appUserId) { // Alterado de Long para String
         ReportFire existingReport = reportFireRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Relatório não encontrado - ID: " + id));
 
+        existingReport.updateFromDTO(reportDetailsDTO);
 
-        existingReport.setState(reportDetailsDTO.getState());
-        existingReport.setCity(reportDetailsDTO.getCity());
-        existingReport.setLatitude(reportDetailsDTO.getLatitude());
-        existingReport.setLongitude(reportDetailsDTO.getLongitude());
-        existingReport.setPicture(reportDetailsDTO.getPicture());
-        existingReport.setDatetime(reportDetailsDTO.getDatetime());
-        existingReport.setIsAreaClosed(reportDetailsDTO.getIsAreaClosed());
-
-
-        AppUser appUser = appUserRepository.findById(appUserId) // Correto!
+        AppUser appUser = appUserRepository.findById(appUserId)
                 .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + appUserId));
         existingReport.setAppUser(appUser);
 

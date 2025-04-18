@@ -1,10 +1,10 @@
 package com.example.FireWatch03.controllers;
 
-import com.example.FireWatch03.dto.ReportFireDTO;
+import com.example.FireWatch03.domain.dto.ReportFireDTO;
 import com.example.FireWatch03.domain.models.AppUser;
 import com.example.FireWatch03.domain.models.ReportFire;
-import com.example.FireWatch03.domain.services.ReportFireService;
-import com.example.FireWatch03.domain.repositories.AppUserRepository;
+import com.example.FireWatch03.services.ReportFireService;
+import com.example.FireWatch03.repositories.AppUserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,7 +50,7 @@ public class ReportFireController {
         report.setLongitude(reportFireDTO.getLongitude());
         report.setPicture(reportFireDTO.getPicture());
         report.setDatetime(reportFireDTO.getDatetime());
-        report.setIsAreaClosed(reportFireDTO.getIsAreaClosed());
+        report.setIsAreaClosed(reportFireDTO.isAreaClosed() ? 'Y' : 'N');
 
         // Use o appUserId do DTO para buscar o usuário
         AppUser appUser = appUserRepository.findById(reportFireDTO.getAppUserId())

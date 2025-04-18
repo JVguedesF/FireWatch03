@@ -1,4 +1,4 @@
-package com.example.FireWatch03.dto;
+package com.example.FireWatch03.domain.dto;
 
 import com.example.FireWatch03.domain.models.UserRole;
 

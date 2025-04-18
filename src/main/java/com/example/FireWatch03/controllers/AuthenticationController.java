@@ -1,8 +1,14 @@
 package com.example.FireWatch03.controllers;
 
-import com.example.FireWatch03.domain.repositories.UserAutenticatorRepository;
-import com.example.FireWatch03.dto.*;
-import com.example.FireWatch03.domain.services.TokenService;
+import com.example.FireWatch03.domain.dto.ApiResponse;
+import com.example.FireWatch03.domain.dto.AuthenticationDTO;
+import com.example.FireWatch03.domain.dto.ErrorDTO;
+import com.example.FireWatch03.domain.dto.LoginResponseDTO;
+import com.example.FireWatch03.domain.dto.RegisterDTO;
+import com.example.FireWatch03.exceptions.UserAlreadyExistsException;
+import com.example.FireWatch03.exceptions.RegistrationFailedException;
+import com.example.FireWatch03.repositories.UserAutenticatorRepository;
+import com.example.FireWatch03.services.TokenService;
 import com.example.FireWatch03.domain.models.UserAutenticator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/FireWatch03")
@@ -33,21 +36,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@RequestBody @Valid AuthenticationDTO data) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
             var auth = authenticationManager.authenticate(usernamePassword);
             var token = tokenService.generateToken((UserAutenticator) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginResponseDTO(token));
+            return ResponseEntity.ok(new ApiResponse<>(true, new LoginResponseDTO(token), "Login bem-sucedido"));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(false, null, "Credenciais inválidas"));
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO data) {
+    public ResponseEntity<UserAutenticator> register(@RequestBody @Valid RegisterDTO data) {
         if (repository.findByLogin(data.login()) != null) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Login já cadastrado!"));
+            throw new UserAlreadyExistsException("Login já cadastrado!");
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -57,7 +61,17 @@ public class AuthenticationController {
             UserAutenticator savedUser = repository.save(newUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Erro ao registrar usuário."));
+            throw new RegistrationFailedException("Erro ao registrar usuário.", e);
         }
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorDTO> handleUserAlreadyExists(UserAlreadyExistsException e) {
+        return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+    }
+
+    @ExceptionHandler(RegistrationFailedException.class)
+    public ResponseEntity<ErrorDTO> handleRegistrationFailed(RegistrationFailedException e) {
+        return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
     }
 }

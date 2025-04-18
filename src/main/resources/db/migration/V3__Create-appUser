@@ -1,5 +1,22 @@
 -- V3__Insert_initial_user.sql
 
--- Inserindo o usuário inicial na tabela app_user
-INSERT INTO app_user (NAME, EMAIL, LONGITUDE, LATITUDE, PASSWORD, PHONE_NUMBER, WANTS_RECEIVE_SMS)
-VALUES ('Nome do Usuário', 'usuario@exemplo.com', -46.6333, -23.5505, 'senha123', '1234567890', 'Y');
+-- Inserir em app_user COM O MESMO ID
+INSERT INTO app_user (
+    id_user,
+    name,
+    email,
+    password,
+    phone_number,
+    wants_receive_sms,
+    longitude,
+    latitude
+) VALUES (
+    'a0be76b5-96bb-42b8-80c3-8a8fc5d4f962', -- ID igual ao users_authenticator
+    'Rebeca Silva',
+    'rebeca@exemplo.com',
+    'senha123',
+    '11999999999',
+    'Y',
+    -46.6333,
+    -23.5505
+);

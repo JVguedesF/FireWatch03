@@ -1,5 +1,4 @@
-package com.example.FireWatch03.domain.services;
-
+package com.example.FireWatch03.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -23,21 +22,26 @@ public class TokenService {
 
     private static final ZoneOffset ZONE = ZoneOffset.of("-03:00");
 
-    public String generateToken(UserAutenticator user){
-        try{
+    public static class TokenGenerationException extends RuntimeException {
+        public TokenGenerationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public String generateToken(UserAutenticator user) {
+        try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
+            return JWT.create()
                     .withIssuer("auth-api")
                     .withSubject(user.getLogin())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
-            return token;
         } catch (JWTCreationException exception) {
-            throw new RuntimeException("Error while generating token", exception);
+            throw new TokenGenerationException("Failed to generate token", exception);
         }
     }
 
-    public String validateToken(String token){
+    public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
@@ -45,7 +49,7 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTVerificationException exception){
+        } catch (JWTVerificationException exception) {
             return "";
         }
     }

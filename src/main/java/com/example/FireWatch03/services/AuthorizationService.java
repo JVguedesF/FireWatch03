@@ -1,7 +1,7 @@
-package com.example.FireWatch03.domain.services;
+package com.example.FireWatch03.services;
 
 import com.example.FireWatch03.domain.models.UserAutenticator;
-import com.example.FireWatch03.domain.repositories.UserAutenticatorRepository;
+import com.example.FireWatch03.repositories.UserAutenticatorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -2,36 +2,34 @@
 
 ## Visão Geral
 
-O FireWatch03 utiliza Docker para containerização e Docker Compose para orquestração de serviços, garantindo consistência entre ambientes de desenvolvimento, staging e produção. Esta abordagem facilita a implantação e o escalonamento da aplicação.
+O FireWatch03 utiliza Docker para containerização e Docker Compose para orquestração, garantindo consistência entre os ambientes de desenvolvimento, staging e produção. Esta abordagem facilita o deployment e o escalonamento da aplicação.
 
-## Estrutura de Containerização
+## Dockerfile Multi-estágio
 
-### Dockerfile Multi-estágio
-
-Nosso Dockerfile implementa uma abordagem de compilação em múltiplos estágios:
-
-1. **Estágio de Build**: Usa a imagem `maven:3.9.9-eclipse-temurin-21` para compilar o código fonte
-2. **Estágio de Runtime**: Usa a imagem `openjdk:21-slim` para executar a aplicação, mantendo a imagem final o mais leve possível
+Implementamos um Dockerfile com abordagem multi-estágio para otimizar o tamanho e a segurança da imagem final:
 
 ```Dockerfile
-# Fase de construção usando Maven e OpenJDK 21
+# Estágio de build
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 COPY src /app/src
 COPY pom.xml /app
 WORKDIR /app
 RUN mvn clean install
 
-# Fase de execução otimizada
+# Estágio de runtime
 FROM openjdk:21-slim
 
-# Cria usuário e grupo não-root
+# Argumentos e variáveis de ambiente
+ARG SPRING_PROFILES_ACTIVE
+ARG SPRING_DATASOURCE_URL
+# Outras variáveis...
+
+# Configuração de usuário não-root
 RUN addgroup --system --gid 1001 appuser && \
     adduser --system --uid 1001 --gid 1001 appuser
 
-# Copia o JAR da fase de construção
+# Cópia do JAR e configuração de permissões
 COPY --from=build /app/target/FireWatch03-0.0.1-SNAPSHOT.jar /app/FireWatch03-0.0.1-SNAPSHOT.jar
-
-# Configura permissões e ambiente
 WORKDIR /app
 RUN chown -R appuser:appuser /app
 
@@ -41,96 +39,76 @@ EXPOSE 8080
 CMD ["java", "-jar", "FireWatch03-0.0.1-SNAPSHOT.jar"]
 ```
 
-### Benefícios da Abordagem Multi-estágio
-
-1. **Tamanho reduzido**: A imagem final contém apenas o necessário para execução
-2. **Segurança aprimorada**: Menos dependências significa menor superfície de ataque
-3. **Isolamento**: As ferramentas de build não estão presentes no ambiente de runtime
-
-## Melhores Práticas Implementadas
-
-### Segurança
-
-- **Usuário não-root**: A aplicação é executada como um usuário não-privilegiado (appuser)
-- **Permissões mínimas**: O contêiner tem acesso apenas aos recursos necessários
-
-### Otimização
-
-- **Imagem base leve**: Utilizamos `openjdk:21-slim` para minimizar o tamanho da imagem
-- **Cacheable layers**: Estruturamos o Dockerfile para maximizar o uso de cache durante builds
-
-### Configuração
-
-- **Externalização de configurações**: Todas as configurações específicas do ambiente são injetadas via variáveis de ambiente
-- **Arquivos .env**: Utilizamos arquivos .env específicos para cada ambiente (staging, produção)
-
 ## Orquestração com Docker Compose
 
-O Docker Compose é utilizado para orquestrar os seguintes serviços:
+O Docker Compose orquestra os seguintes serviços:
 
-1. **app**: A aplicação FireWatch03
-2. **db**: Banco de dados Oracle XE
-3. **prometheus**: Serviço de coleta de métricas
-4. **grafana**: Plataforma de visualização de métricas
+1. **app**: Aplicação Java Spring Boot
+2. **prometheus**: Coleta de métricas
+3. **grafana**: Visualização de métricas
 
 ```yaml
 version: '3.8'
 
 services:
   app:
-    image: ${DOCKER_IMAGE:-firewatch03:latest}
-    # ...configurações
-
-  db:
-    image: gvenzl/oracle-xe:21-slim
-    # ...configurações
+    image: ${DOCKER_IMAGE}
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE
+      # Outras variáveis...
+    networks:
+      - firewatch-network
 
   prometheus:
     image: prom/prometheus
-    # ...configurações
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - firewatch-network
 
   grafana:
     image: grafana/grafana
-    # ...configurações
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/11378_rev2.json:/etc/grafana/provisioning/dashboards/spring-boot-monitor.json
+      - ./monitoring/grafana/17024_rev1.json:/etc/grafana/provisioning/dashboards/spring-boot-endpoints.json
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+    ports:
+      - "3000:3000"
+    networks:
+      - firewatch-network
 ```
 
-### Redes e Volumes
+## Boas Práticas Implementadas
 
-- **Rede dedicada**: Os serviços se comunicam através de uma rede dedicada `firewatch-network`
-- **Volumes persistentes**: Dados do Oracle e do Grafana são armazenados em volumes persistentes
+### Segurança
 
-## Estratégia de Deployment
+- **Execução não-root**: A aplicação executa como usuário não-privilegiado
+- **Secrets**: Informações sensíveis são passadas via variáveis de ambiente
+- **Imagem base mínima**: Uso de imagem slim para reduzir superfície de ataque
 
-### Script de Deployment Automatizado
+### Configuração
 
-Utilizamos um script `deploy.sh` para automatizar o deployment em diferentes ambientes:
+- **Ambiente via variáveis**: Todas as configurações são passadas via variáveis de ambiente
+- **Perfis por ambiente**: Uso de perfis Spring (dev, staging, prod) para configurações específicas
+- **Arquivo .env**: Configurações centralizadas em arquivos .env por ambiente
 
-```bash
-./deploy.sh staging  # Deploy no ambiente de staging
-./deploy.sh prod     # Deploy no ambiente de produção
-```
-
-O script realiza as seguintes operações:
-1. Seleciona o arquivo de configuração apropriado (.env.staging ou .env.production)
-2. Constrói a imagem Docker com a tag correta
-3. Para os containers existentes
-4. Inicia os novos containers com as configurações atualizadas
-
-### Processo de Rollback
-
-Em caso de falha no deployment, podemos facilmente realizar um rollback:
-
-1. Identificar a versão estável anterior
-2. Especificar a tag correspondente na variável `DOCKER_IMAGE` no arquivo .env
-3. Executar `docker-compose up -d` para implantar a versão anterior
-
-## Monitoramento dos Containers
+## Monitoramento
 
 ### Prometheus
 
-O Prometheus coleta métricas da aplicação através do endpoint `/actuator/prometheus`, configurado em `prometheus.yml`:
+Configurado para coletar métricas da aplicação:
 
 ```yaml
+global:
+  scrape_interval: 15s
+
 scrape_configs:
   - job_name: 'firewatch03'
     metrics_path: '/actuator/prometheus'
@@ -140,19 +118,21 @@ scrape_configs:
 
 ### Grafana
 
-O Grafana visualiza as métricas coletadas pelo Prometheus, apresentando dashboards para:
-- Uso de CPU e memória
-- Requisições por segundo
-- Tempo de resposta
-- Métricas específicas da aplicação
+Dashboards personalizados para visualizar:
+- Spring Boot 2.1 System Monitor: Foco em métricas do sistema como CPU, memória e JVM
+- Spring Boot Endpoint Metrics: Monitoramento de endpoints específicos da aplicação, incluindo taxa de requisições, tempo de resposta e erros
 
-## Conclusão
+## Deployment Automatizado
 
-A estratégia de containerização e orquestração do FireWatch03 permite:
+O script `deploy.sh` automatiza o processo de deployment:
 
-1. **Consistência entre ambientes**: O mesmo container é executado em desenvolvimento, staging e produção
-2. **Facilidade de deployment**: O processo de implantação é automatizado e consistente
-3. **Observabilidade**: Prometheus e Grafana fornecem visibilidade do comportamento da aplicação
-4. **Escalabilidade**: A arquitetura baseada em containers facilita o escalonamento horizontal
+```bash
+./deploy.sh staging  # Deploy no ambiente de staging
+./deploy.sh prod     # Deploy no ambiente de produção
+```
 
-Esta abordagem baseada em DevOps fortalece o ciclo de vida da aplicação, desde o desenvolvimento até a produção, garantindo que as mudanças sejam testadas e implantadas com segurança e eficiência.
+Este script:
+1. Seleciona o arquivo .env correto
+2. Constrói a imagem Docker com a tag apropriada
+3. Para os containers existentes
+4. Inicia os novos containers com as configurações atualizadas

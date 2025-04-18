@@ -1,4 +1,4 @@
-package com.example.FireWatch03.domain.services;
+package com.example.FireWatch03.services;
 
 
 import com.auth0.jwt.JWT;

@@ -1,10 +1,10 @@
 package com.example.FireWatch03.controllers;
 
-import com.example.FireWatch03.dto.ReportFireDTO;
+import com.example.FireWatch03.domain.dto.ReportFireDTO;
 import com.example.FireWatch03.domain.models.AppUser;
 import com.example.FireWatch03.domain.models.ReportFire;
-import com.example.FireWatch03.domain.services.ReportFireService;
-import com.example.FireWatch03.domain.repositories.AppUserRepository;
+import com.example.FireWatch03.services.ReportFireService;
+import com.example.FireWatch03.repositories.AppUserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/report-fires")
 public class ReportFireController {
 
-    @Autowired
-    private ReportFireService reportFireService;
+    private final ReportFireService reportFireService;
+    private final AppUserRepository appUserRepository;
 
     @Autowired
-    private AppUserRepository appUserRepository;
+    public ReportFireController(ReportFireService reportFireService, AppUserRepository appUserRepository) {
+        this.reportFireService = reportFireService;
+        this.appUserRepository = appUserRepository;
+    }
 
     @GetMapping
     public List<ReportFireDTO> getAllReports() {
@@ -40,7 +43,6 @@ public class ReportFireController {
 
     @PostMapping
     public ResponseEntity<ReportFireDTO> createReport(@Valid @RequestBody ReportFireDTO reportFireDTO) {
-        // Cria o ReportFire a partir do DTO
         ReportFire report = new ReportFire();
         report.setState(reportFireDTO.getState());
         report.setCity(reportFireDTO.getCity());
@@ -48,9 +50,14 @@ public class ReportFireController {
         report.setLongitude(reportFireDTO.getLongitude());
         report.setPicture(reportFireDTO.getPicture());
         report.setDatetime(reportFireDTO.getDatetime());
-        report.setIsAreaClosed(reportFireDTO.getIsAreaClosed());
+        report.setIsAreaClosed(reportFireDTO.isAreaClosed() ? 'Y' : 'N');
 
-        ReportFire createdReport = reportFireService.createReport(reportFireDTO);
+        // Use o appUserId do DTO para buscar o usuário
+        AppUser appUser = appUserRepository.findById(reportFireDTO.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado - ID: " + reportFireDTO.getAppUserId()));
+        report.setAppUser(appUser);
+
+        ReportFire createdReport = reportFireService.createReport(report, reportFireDTO.getAppUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReportFireDTO(createdReport));
     }
 

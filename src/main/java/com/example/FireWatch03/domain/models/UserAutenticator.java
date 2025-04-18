@@ -73,4 +73,3 @@ public class UserAutenticator implements UserDetails {
         return true;
     }
 }
-

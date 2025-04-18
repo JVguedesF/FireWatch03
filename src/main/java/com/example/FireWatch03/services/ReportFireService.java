@@ -1,10 +1,10 @@
-package com.example.FireWatch03.domain.services;
+package com.example.FireWatch03.services;
 
-import com.example.FireWatch03.dto.ReportFireDTO;
+import com.example.FireWatch03.domain.dto.ReportFireDTO;
 import com.example.FireWatch03.domain.models.AppUser;
 import com.example.FireWatch03.domain.models.ReportFire;
-import com.example.FireWatch03.domain.repositories.AppUserRepository;
-import com.example.FireWatch03.domain.repositories.ReportFireRepository;
+import com.example.FireWatch03.repositories.AppUserRepository;
+import com.example.FireWatch03.repositories.ReportFireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

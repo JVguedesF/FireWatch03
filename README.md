@@ -18,9 +18,9 @@ O projeto utiliza:
 ## Requisitos
 
 Para executar o projeto, você precisará:
-- Docker e Docker Compose
+- Docker
+-  Docker Compose
 - Git
-- Netcat (opcional, para verificação de conectividade)
 
 ## Executando o Projeto
 

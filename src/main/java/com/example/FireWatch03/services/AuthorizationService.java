@@ -2,6 +2,7 @@ package com.example.FireWatch03.services;
 
 import com.example.FireWatch03.domain.models.UserAutenticator;
 import com.example.FireWatch03.repositories.UserAutenticatorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +13,7 @@ public class AuthorizationService implements UserDetailsService {
 
     private final UserAutenticatorRepository repository;
 
+    @Autowired
     public AuthorizationService(UserAutenticatorRepository repository) {
         this.repository = repository;
     }

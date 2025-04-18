@@ -1,6 +1,5 @@
 package com.example.FireWatch03.services;
 
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -18,21 +17,31 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(UserAutenticator user){
-        try{
+    @Value("${spring.profiles.active:prod}")
+    private String activeProfile;
+
+    private static final ZoneOffset ZONE = ZoneOffset.of("-03:00");
+
+    public static class TokenGenerationException extends RuntimeException {
+        public TokenGenerationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public String generateToken(UserAutenticator user) {
+        try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
+            return JWT.create()
                     .withIssuer("auth-api")
                     .withSubject(user.getLogin())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
-            return token;
         } catch (JWTCreationException exception) {
-            throw new RuntimeException("Error while generating token", exception);
+            throw new TokenGenerationException("Failed to generate token", exception);
         }
     }
 
-    public String validateToken(String token){
+    public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
@@ -40,12 +49,13 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTVerificationException exception){
+        } catch (JWTVerificationException exception) {
             return "";
         }
     }
 
-    private Instant genExpirationDate(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    private Instant genExpirationDate() {
+        int hours = "staging".equals(activeProfile) ? 8 : 2;
+        return LocalDateTime.now().plusHours(hours).toInstant(ZONE);
     }
 }

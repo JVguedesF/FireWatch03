@@ -41,11 +41,11 @@ CMD ["java", "-jar", "FireWatch03-0.0.1-SNAPSHOT.jar"]
 
 ## Orquestração com Docker Compose
 
-O Docker Compose orquestra os seguintes serviços:
+#### O Docker Compose orquestra os seguintes serviços:
 
-1. **app**: Aplicação Java Spring Boot
-2. **prometheus**: Coleta de métricas
-3. **grafana**: Visualização de métricas
+  1. **app**: Aplicação Java Spring Boot
+  2. **prometheus**: Coleta de métricas
+  3. **grafana**: Visualização de métricas
 
 ```yaml
 version: '3.8'
@@ -119,6 +119,7 @@ scrape_configs:
 ### Grafana
 
 Dashboards personalizados para visualizar:
+
 - Spring Boot 2.1 System Monitor: Foco em métricas do sistema como CPU, memória e JVM
 - Spring Boot Endpoint Metrics: Monitoramento de endpoints específicos da aplicação, incluindo taxa de requisições, tempo de resposta e erros
 
@@ -131,8 +132,9 @@ O script `deploy.sh` automatiza o processo de deployment:
 ./deploy.sh prod     # Deploy no ambiente de produção
 ```
 
-Este script:
-1. Seleciona o arquivo .env correto
-2. Constrói a imagem Docker com a tag apropriada
-3. Para os containers existentes
+#### Este script:
+
+1. Seleciona o arquivo `.env` correto  
+2. Constrói a imagem Docker com a tag apropriada  
+3. Para os containers existentes  
 4. Inicia os novos containers com as configurações atualizadas

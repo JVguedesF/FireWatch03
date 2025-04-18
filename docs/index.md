@@ -161,7 +161,8 @@ echo "   • Prometheus: http://localhost:9090"
 echo "   • Grafana:   http://localhost:3000 (admin/$G_PASS)"
 ```
 
-O script realiza as seguintes operações:
+#### O script realiza as seguintes operações:
+
 1. Verifica se o ambiente especificado é válido (staging ou prod)
 2. Copia o arquivo de configuração apropriado
 3. Constrói a imagem Docker com a tag correspondente

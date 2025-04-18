@@ -64,15 +64,19 @@ jobs:
 
 Todas as informações sensíveis (credenciais de banco de dados, tokens de API, senhas) são armazenadas como secrets no GitHub e injetadas no pipeline apenas durante a execução. Isso garante que essas informações nunca sejam expostas nos logs ou no código.
 
+## Segurança no Pipeline
+
+Todas as informações sensíveis são armazenadas como secrets no GitHub:
+
 ```yaml
+# {% raw %}
 docker build \
   --build-arg SPRING_PROFILES_ACTIVE=staging \
   --build-arg SPRING_DATASOURCE_URL="${{ secrets.STAGING_DB_URL }}" \
   --build-arg SPRING_DATASOURCE_USERNAME="${{ secrets.STAGING_DB_USER }}" \
   --build-arg SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGING_DB_PASS }}" \
-  --build-arg API_SECURITY_TOKEN_SECRET="${{ secrets.STAGING_API_SECRET }}" \
-  --build-arg GRAFANA_PASSWORD="${{ secrets.STAGING_GF_PASS }}" \
   -t firewatch03:staging .
+# {% endraw %}
 ```
 
 ## Fluxo de Trabalho
